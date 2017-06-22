@@ -1,4 +1,4 @@
-package classifier;
+package regression;
 
 import weka.classifiers.evaluation.Evaluation;
 import weka.classifiers.functions.LinearRegression;
