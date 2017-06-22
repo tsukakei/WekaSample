@@ -14,11 +14,13 @@ import weka.core.converters.ConverterUtils;
 public class WekaRegression {
     protected LinearRegression regModel;
     protected Instances instances;
+    protected Instances train;
+    protected Instances test;
 
     public static void main(String[] args) {
         WekaRegression regression = new WekaRegression();
         regression.training();
-        regression.regression();
+//        regression.regression();
     }
 
     public void training() {
@@ -28,6 +30,10 @@ public class WekaRegression {
             ConverterUtils.DataSource source = new ConverterUtils.DataSource("housing.arff");
             instances = source.getDataSet();
             instances.setClassIndex(instances.numAttributes() - 1);
+            int trainSize = (int) Math.round(instances.numInstances() * 0.9);
+            int testSize = instances.numInstances() - trainSize;
+            train = new Instances(instances, 0, trainSize);
+            test = new Instances(instances, trainSize, testSize);
             regModel = new LinearRegression();
             regModel.buildClassifier(instances);
             // Evaluate the generated classifier
@@ -35,6 +41,12 @@ public class WekaRegression {
             eval.evaluateModel(regModel, instances);
             System.out.println(eval.toSummaryString());
             System.out.println("Finish training");
+
+            System.out.println("Start evaluating");
+            eval = new Evaluation(test);
+            eval.evaluateModel(regModel, test);
+            System.out.println(eval.toSummaryString());
+            System.out.println("Finish evaluating");
         } catch (Exception e) {
             e.printStackTrace();
         }

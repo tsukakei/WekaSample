@@ -5,6 +5,7 @@ import weka.classifiers.Evaluation;
 import weka.classifiers.functions.SMO;
 import weka.core.*;
 import weka.core.converters.ConverterUtils;
+import weka.filters.unsupervised.instance.RemovePercentage;
 
 /**
  * Created by TK on 6/22/17.
@@ -12,11 +13,13 @@ import weka.core.converters.ConverterUtils;
 public class WekaClassifier {
     protected Classifier classifier;
     protected Instances instances;
+    protected Instances train;
+    protected Instances test;
 
     public static void main(String[] args) {
         WekaClassifier weka = new WekaClassifier();
         weka.training();
-        weka.classify();
+//        weka.classify();
     }
 
     protected void training() {
@@ -26,13 +29,23 @@ public class WekaClassifier {
              ConverterUtils.DataSource source = new ConverterUtils.DataSource("iris.arff");
              instances = source.getDataSet();
              instances.setClassIndex(instances.numAttributes() - 1);
+             int trainSize = (int) Math.round(instances.numInstances() * 0.9);
+             int testSize = instances.numInstances() - trainSize;
+             train = new Instances(instances, 0, trainSize);
+             test = new Instances(instances, trainSize, testSize);
              classifier = new SMO();
-             classifier.buildClassifier(instances);
+             classifier.buildClassifier(train);
              // Evaluate the generated classifier
-             Evaluation eval = new Evaluation(instances);
-             eval.evaluateModel(classifier, instances);
+             Evaluation eval = new Evaluation(train);
+             eval.evaluateModel(classifier, train);
              System.out.println(eval.toSummaryString());
              System.out.println("Finish training");
+
+             System.out.println("Start evaluating");
+             eval = new Evaluation(test);
+             eval.evaluateModel(classifier, test);
+             System.out.println(eval.toSummaryString());
+             System.out.println("Finish evaluating");
          } catch (Exception e) {
              e.printStackTrace();
          }
